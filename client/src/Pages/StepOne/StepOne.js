@@ -15,11 +15,17 @@ class StepOne extends Component {
     this.state = {
       leerlingnummer: "",
       geboortedatum: "",
-      student: ""
+      studentName: "",
+      studentSurname: "",
+      modalOpen: false
     };
     this.onChange = this.onChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
+
+  handleOpen = () => this.setState({ modalOpen: true });
+
+  handleClose = () => this.setState({ modalOpen: false });
 
   handleSubmit(event) {
     const context = this;
@@ -40,10 +46,13 @@ class StepOne extends Component {
         if (response.status >= 400) {
           throw new Error("Bad response from server");
         }
-        console.log(response);
+        return response.json();
       })
       .then(function(response) {
-        console.log(response);
+        context.setState({
+          studentName: response["Roepnaam"],
+          studentSurname: response["Achternaam"]
+        });
       })
       .catch(function(err) {
         console.log(err);
@@ -95,22 +104,40 @@ class StepOne extends Component {
                 />
                 <Modal
                   trigger={
-                    <Button color="green" fluid size="large">
+                    <Button
+                      color="green"
+                      fluid
+                      size="large"
+                      onClick={this.handleOpen}
+                    >
                       Login
                     </Button>
                   }
+                  open={this.state.modalOpen}
+                  onClose={this.handleClose}
                   basic
                 >
                   <Header icon="archive" content="Archive Old Messages" />
                   <Modal.Content>
-                    <p>Ben jij {this.state.student}</p>
+                    <p>
+                      Ben jij{" "}
+                      {this.state.studentName +
+                        " " +
+                        this.state.studentSurname +
+                        "?"}
+                    </p>
                   </Modal.Content>
                   <Modal.Actions>
-                    <Button basic color="red" inverted>
-                      <Icon name="remove" /> No
+                    <Button
+                      basic
+                      color="red"
+                      inverted
+                      onClick={this.handleClose}
+                    >
+                      <Icon name="remove" /> Nee, wijzig mijn gegevens
                     </Button>
                     <Button color="green" inverted>
-                      <Icon name="checkmark" /> Yes
+                      <Icon name="checkmark" /> Ja, verder
                     </Button>
                   </Modal.Actions>
                 </Modal>

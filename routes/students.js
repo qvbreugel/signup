@@ -6,9 +6,7 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   host: "127.0.0.1",
   user: "root",
-  password: "root",
-  database: "students",
-  port: 8889
+  database: "students"
 });
 
 function getConnection() {
@@ -28,8 +26,8 @@ router.post("/login", function(req, res, next) {
     fields
   ) {
     if (error) throw error;
-    console.log(results);
-    res.send(results);
+    console.log(results[0]);
+    res.send(results[0]);
   });
 });
 
