@@ -8,6 +8,7 @@ import {
   Icon,
   Modal
 } from "semantic-ui-react";
+import { Redirect } from "react-router-dom";
 
 class StepOne extends Component {
   constructor(props) {
@@ -17,11 +18,14 @@ class StepOne extends Component {
       geboortedatum: "",
       studentName: "",
       studentSurname: "",
-      modalOpen: false
+      modalOpen: false,
+      moveToStepTwo: false
     };
     this.onChange = this.onChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
+
+  moveToStepTwo = () => this.setState({ moveToStepTwo: true });
 
   handleOpen = () => this.setState({ modalOpen: true });
 
@@ -73,78 +77,91 @@ class StepOne extends Component {
         height: 100%;
       }
     `}</style>
-        <Grid
-          textAlign="center"
-          style={{ height: "100%" }}
-          verticalAlign="middle"
-        >
-          <Grid.Column style={{ maxWidth: 450 }}>
-            <Header as="h2" color="green" textAlign="center">
-              <Icon name="building" /> Voer hier je gegevens in
-            </Header>
-            <Form size="large" onSubmit={this.handleSubmit} method="POST">
-              <Segment stacked>
-                <Form.Input
-                  onChange={this.onChange}
-                  value={this.state.leerlingnummer}
-                  name="leerlingnummer"
-                  fluid
-                  icon="user"
-                  iconPosition="left"
-                  placeholder="Leerlingnummer"
-                />
-                <Form.Input
-                  onChange={this.onChange}
-                  value={this.state.geboortedatum}
-                  name="geboortedatum"
-                  fluid
-                  icon="calendar alternate"
-                  iconPosition="left"
-                  placeholder="Geboortedatum (DD-MM-YYYY)"
-                />
-                <Modal
-                  trigger={
-                    <Button
-                      color="green"
-                      fluid
-                      size="large"
-                      onClick={this.handleOpen}
-                    >
-                      Login
-                    </Button>
-                  }
-                  open={this.state.modalOpen}
-                  onClose={this.handleClose}
-                  basic
-                >
-                  <Header icon="archive" content="Archive Old Messages" />
-                  <Modal.Content>
-                    <p>
-                      Ben jij{" "}
-                      {this.state.studentName +
-                        " " +
-                        this.state.studentSurname +
-                        "?"}
-                    </p>
-                  </Modal.Content>
-                  <Modal.Actions>
-                    <Button
-                      basic
-                      color="red"
-                      inverted
-                      onClick={this.handleClose}
-                    >
-                      <Icon name="remove" /> Nee, wijzig mijn gegevens
-                    </Button>
-                    <Button color="green" inverted>
-                      <Icon name="checkmark" /> Ja, verder
-                    </Button>
-                  </Modal.Actions>
-                </Modal>
-              </Segment>
-            </Form>
-          </Grid.Column>
-        </Grid>
+        {this.state.moveToStepTwo ? (
+          <Redirect
+            to={{
+              pathname: "/two",
+              state: { leerlingnummer: this.state.leerlingnummer }
+            }}
+          />
+        ) : (
+          <Grid
+            textAlign="center"
+            style={{ height: "100%" }}
+            verticalAlign="middle"
+          >
+            <Grid.Column style={{ maxWidth: 450 }}>
+              <Header as="h2" color="green" textAlign="center">
+                <Icon name="building" /> Voer hier je gegevens in
+              </Header>
+              <Form size="large" onSubmit={this.handleSubmit} method="POST">
+                <Segment stacked>
+                  <Form.Input
+                    onChange={this.onChange}
+                    value={this.state.leerlingnummer}
+                    name="leerlingnummer"
+                    fluid
+                    icon="user"
+                    iconPosition="left"
+                    placeholder="Leerlingnummer"
+                  />
+                  <Form.Input
+                    onChange={this.onChange}
+                    value={this.state.geboortedatum}
+                    name="geboortedatum"
+                    fluid
+                    icon="calendar alternate"
+                    iconPosition="left"
+                    placeholder="Geboortedatum (DD-MM-YYYY)"
+                  />
+                  <Modal
+                    trigger={
+                      <Button
+                        color="green"
+                        fluid
+                        size="large"
+                        onClick={this.handleOpen}
+                      >
+                        Login
+                      </Button>
+                    }
+                    open={this.state.modalOpen}
+                    onClose={this.handleClose}
+                    basic
+                  >
+                    <Header icon="archive" content="Archive Old Messages" />
+                    <Modal.Content>
+                      <p>
+                        Ben jij{" "}
+                        {this.state.studentName +
+                          " " +
+                          this.state.studentSurname +
+                          "?"}
+                      </p>
+                    </Modal.Content>
+                    <Modal.Actions>
+                      <Button
+                        basic
+                        color="red"
+                        inverted
+                        onClick={this.handleClose}
+                      >
+                        <Icon name="remove" /> Nee, wijzig mijn gegevens
+                      </Button>
+                      <Button
+                        color="green"
+                        inverted
+                        onClick={this.moveToStepTwo}
+                      >
+                        <Icon name="checkmark" /> Ja, verder
+                      </Button>
+                    </Modal.Actions>
+                  </Modal>
+                </Segment>
+              </Form>
+            </Grid.Column>
+          </Grid>
+        )}
         {this.state.student}
       </div>
     );
