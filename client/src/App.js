@@ -4,8 +4,7 @@ import { BrowserRouter, Route, Switch } from "react-router-dom";
 
 import StepOne from "./Pages/StepOne/StepOne";
 import StepTwo from "./Pages/StepTwo/StepTwo";
-
-const studentContext = React.createContext("00000");
+import StepThree from "./Pages/StepThree/StepThree";
 
 class App extends Component {
   render() {
@@ -15,6 +14,7 @@ class App extends Component {
           <Switch>
             <Route path="/" exact component={StepOne} />
             <Route path="/two" exact component={StepTwo} />
+            <Route path="/three" exact component={StepThree} />
           </Switch>
         </BrowserRouter>
       </div>

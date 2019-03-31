@@ -13,21 +13,49 @@ class StepTwo extends Component {
       value: "",
       moveToStepThree: false
     };
+    this.moveToStepThree = this.moveToStepThree.bind(this);
   }
 
   handleChange = (e, { value }) => this.setState({ value });
 
-  moveToStepThree = () => this.setState({ moveToStepThree: true });
+  moveToStepThree() {
+    const context = this;
+
+    console.log(this.state.value);
+
+    const data = {
+      keuze_1: this.state.value[0],
+      keuze_2: this.state.value[1],
+      keuze_3: this.state.value[2],
+      leerlingnummer: this.state.leerlingnummer
+    };
+
+    fetch("/students/keuze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    })
+      .then(function(response) {
+        if (response.status >= 400) {
+          throw new Error("Bad response from server");
+        }
+        return response.json();
+      })
+      .then(function() {
+        context.setState({
+          moveToStepThree: true
+        });
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
+  }
 
   componentDidMount() {
     const context = this;
 
-    const data = { leerlingnummer: this.state.leerlingnummer };
-
     fetch("/students/beroepen", {
-      method: "POST",
-      headers: { "Conent-Type": "application/json" },
-      body: JSON.stringify(data)
+      method: "get"
     })
       .then(function(response) {
         if (response.status >= 400) {
