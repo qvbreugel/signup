@@ -31,4 +31,16 @@ router.post("/login", function(req, res, next) {
   });
 });
 
+router.post("/beroepen", function(req, res, next) {
+  // const leerlingnummer = req.body.leerlingnummer;
+
+  const connection = getConnection();
+  const queryString = "SELECT * FROM beroepen WHERE NOT vrije_plaatsen=0";
+  connection.query(queryString, function(error, results, fields) {
+    if (error) throw error;
+    console.log(results);
+    res.send(results);
+  });
+});
+
 module.exports = router;
