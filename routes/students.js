@@ -19,15 +19,19 @@ router.post("/login", function(req, res, next) {
 
   const connection = getConnection();
   const queryString =
-    "SELECT Roepnaam,Achternaam FROM leerlingen WHERE Leerlingnummer = ? AND Geboortedatum = ?";
+    "SELECT Roepnaam,Achternaam,registered FROM leerlingen WHERE Leerlingnummer = ? AND Geboortedatum = ?";
   connection.query(queryString, [leerlingnummer, geboortedatum], function(
     error,
     results,
     fields
   ) {
     if (error) throw error;
-    console.log(results[0]);
-    res.send(results[0]);
+    console.log(typeof results[0]);
+    if (typeof results[0] === "undefined") {
+      res.send({ error: true });
+    } else {
+      res.send(results[0]);
+    }
   });
 });
 
@@ -74,6 +78,88 @@ router.post("/keuze", function(req, res, next) {
       res.send(results);
     }
   );
+});
+
+router.post("/plaatsen", function(req, res, next) {
+  const leerlingnummer = req.body.leerlingnummer;
+
+  const connection = getConnection();
+  const queryString =
+    "SELECT Beroep_1, Beroep_2, Beroep_3 FROM leerlingen  WHERE Leerlingnummer = ?";
+
+  const setRegistered =
+    "UPDATE leerlingen SET registered = TRUE WHERE Leerlingnummer = ?";
+  connection.query(setRegistered, [leerlingnummer], function(
+    error,
+    results,
+    fields
+  ) {
+    if (error) throw error;
+    connection.query(queryString, [leerlingnummer], function(
+      error,
+      results,
+      fields
+    ) {
+      if (error) throw error;
+      console.log(results);
+      const keuze_1 = results[0]["Beroep_1"];
+      const keuze_2 = results[0]["Beroep_2"];
+      const keuze_3 = results[0]["Beroep_3"];
+
+      const retreiveSpaces =
+        "SELECT vrije_plaatsen FROM beroepen WHERE beroep = ?";
+
+      const decreaseSpaces =
+        "UPDATE beroepen SET vrije_plaatsen = ? WHERE beroep = ?";
+
+      connection.query(retreiveSpaces, [keuze_1], function(
+        error,
+        results,
+        fields
+      ) {
+        if (error) throw error;
+        const decreasedSpaces_1 = results[0]["vrije_plaatsen"] - 1;
+        connection.query(decreaseSpaces, [decreasedSpaces_1, keuze_1], function(
+          error,
+          results,
+          fields
+        ) {
+          if (error) throw error;
+          connection.query(retreiveSpaces, [keuze_2], function(
+            error,
+            results,
+            fields
+          ) {
+            if (error) throw error;
+            const decreasedSpaces_2 = results[0]["vrije_plaatsen"] - 1;
+            connection.query(
+              decreaseSpaces,
+              [decreasedSpaces_2, keuze_2],
+              function(error, results, fields) {
+                if (error) throw error;
+                connection.query(retreiveSpaces, [keuze_3], function(
+                  error,
+                  results,
+                  fields
+                ) {
+                  if (error) throw error;
+                  const decreasedSpaces_3 = results[0]["vrije_plaatsen"] - 1;
+                  connection.query(
+                    decreaseSpaces,
+                    [decreasedSpaces_3, keuze_3],
+                    function(error, results, fields) {
+                      if (error) throw error;
+                      res.send(results);
+                    }
+                  );
+                });
+              }
+            );
+          });
+        });
+      });
+    });
+  });
 });
 
 module.exports = router;

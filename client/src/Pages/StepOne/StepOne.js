@@ -2,13 +2,15 @@ import React, { Component } from "react";
 import {
   Form,
   Button,
+  Container,
   Segment,
-  Grid,
   Header,
+  Message,
   Icon,
   Modal
 } from "semantic-ui-react";
 import { Redirect } from "react-router-dom";
+import "./StepOne.css";
 
 class StepOne extends Component {
   constructor(props) {
@@ -19,20 +21,33 @@ class StepOne extends Component {
       studentName: "",
       studentSurname: "",
       modalOpen: false,
-      moveToStepTwo: false
+      moveToStepTwo: false,
+      error: false,
+      navigationError: false,
+      errorMessage: ""
     };
     this.onChange = this.onChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  moveToStepTwo = () => this.setState({ moveToStepTwo: true });
+  componentDidMount() {
+    console.log(this.props.location.state);
+    if (typeof this.props.location.state !== "undefined") {
+      this.setState({
+        error: true,
+        errorMessage:
+          "Let op dat je geen pagina's vooruit of achteruit kan gaan. Alles moet in één keer ingevuld worden."
+      });
+    }
+  }
 
-  handleOpen = () => this.setState({ modalOpen: true });
+  moveToStepTwo = () => this.setState({ moveToStepTwo: true });
 
   handleClose = () => this.setState({ modalOpen: false });
 
   handleSubmit(event) {
     const context = this;
+    context.setState({ error: false });
 
     event.preventDefault();
 
@@ -53,10 +68,26 @@ class StepOne extends Component {
         return response.json();
       })
       .then(function(response) {
-        context.setState({
-          studentName: response["Roepnaam"],
-          studentSurname: response["Achternaam"]
-        });
+        console.log(response["error"]);
+        if (response["error"]) {
+          context.setState({
+            error: true,
+            errorMessage:
+              "Controleer of de juiste gegevens hebt ingevuld. Als je problemen blijft houden, neem contact op met je teamleider"
+          });
+        } else if (response["registered"]) {
+          context.setState({
+            error: true,
+            errorMessage:
+              "Je hebt je al ingeschreven. Als je je keuzes wilt wijzigen, neem contact op met je teamleider"
+          });
+        } else {
+          context.setState({
+            studentName: response["Roepnaam"],
+            studentSurname: response["Achternaam"],
+            modalOpen: true
+          });
+        }
       })
       .catch(function(err) {
         console.log(err);
@@ -69,14 +100,7 @@ class StepOne extends Component {
 
   render() {
     return (
-      <div className="login-form">
-        <style>{`
-      body > div,
-      body > div > div,
-      body > div > div > div.login-form {
-        height: 100%;
-      }
-    `}</style>
+      <Container>
         {this.state.moveToStepTwo ? (
           <Redirect
             to={{
@@ -85,17 +109,24 @@ class StepOne extends Component {
             }}
           />
         ) : (
-          <Grid
-            textAlign="center"
-            style={{ height: "100%" }}
-            verticalAlign="middle"
-          >
-            <Grid.Column style={{ maxWidth: 450 }}>
-              <Header as="h2" color="green" textAlign="center">
-                <Icon name="building" /> Voer hier je gegevens in
-              </Header>
+          <Segment.Group className="top">
+            <Segment>
+              <h1>Beroepenmarkt</h1>
+            </Segment>
+            <Segment.Group>
+              <Segment>
+                <p>Voer hier je gegevens in</p>
+              </Segment>
               <Form size="large" onSubmit={this.handleSubmit} method="POST">
-                <Segment stacked>
+                <Segment>
+                  {this.state.error ? (
+                    <Message negative>
+                      <Message.Header>Er is iets fout gegaan</Message.Header>
+                      <p>{this.state.errorMessage}</p>
+                    </Message>
+                  ) : (
+                    ""
+                  )}
                   <Form.Input
                     onChange={this.onChange}
                     value={this.state.leerlingnummer}
@@ -104,6 +135,7 @@ class StepOne extends Component {
                     icon="user"
                     iconPosition="left"
                     placeholder="Leerlingnummer"
+                    error={this.state.leerlingnummerError}
                   />
                   <Form.Input
                     onChange={this.onChange}
@@ -121,6 +153,10 @@ class StepOne extends Component {
                         fluid
                         size="large"
                         onClick={this.handleOpen}
+                        disabled={
+                          !this.state.leerlingnummer ||
+                          !this.state.geboortedatum
+                        }
                       >
                         Login
                       </Button>
@@ -129,7 +165,10 @@ class StepOne extends Component {
                     onClose={this.handleClose}
                     basic
                   >
-                    <Header icon="archive" content="Archive Old Messages" />
+                    <Header
+                      icon="check circle outline"
+                      content="Verifieer dat jij het bent"
+                    />
                     <Modal.Content>
                       <p>
                         Ben jij{" "}
@@ -159,11 +198,10 @@ class StepOne extends Component {
                   </Modal>
                 </Segment>
               </Form>
-            </Grid.Column>
-          </Grid>
+            </Segment.Group>
+          </Segment.Group>
         )}
-        {this.state.student}
-      </div>
+      </Container>
     );
   }
 }

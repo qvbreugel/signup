@@ -1,27 +1,30 @@
 import React, { Component } from "react";
-import { Button, Container, Dropdown, Icon, Segment } from "semantic-ui-react";
+import { Button, Container, Icon, Segment } from "semantic-ui-react";
 import { Redirect } from "react-router-dom";
+
+import "./StepThree.css";
 
 class StepThree extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      leerlingnummer: this.props.location.state.leerlingnummer,
+      leerlingnummer: "",
       leerling: {},
-      moveToStepFour: false
+      moveToStepFour: false,
+      redirectHome: false
     };
+    this.moveToStepFour = this.moveToStepFour.bind(this);
   }
 
   handleChange = (e, { value }) => this.setState({ value });
 
-  moveToStepFour = () => this.setState({ moveToStepFour: true });
-
-  componentDidMount() {
+  moveToStepFour() {
+    this.setState({ moveToStepFour: true });
     const context = this;
 
-    const data = { leerlingnummer: this.state.leerlingnummer };
+    const data = { leerlingnummer: this.props.location.state.leerlingnummer };
 
-    fetch("/students/gegevens", {
+    fetch("/students/plaatsen", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
@@ -32,20 +35,56 @@ class StepThree extends Component {
         }
         return response.json();
       })
-      .then(function(response) {
-        context.setState({
-          leerling: response[0]
-        });
-      })
+      .then(function(response) {})
       .catch(function(err) {
         console.log(err);
       });
   }
 
+  componentDidMount() {
+    if (typeof this.props.location.state == "undefined") {
+      this.setState({ redirectHome: true });
+    } else {
+      this.setState({
+        leerlingnummer: this.props.location.state.leerlingnummer
+      });
+      console.log(this.props.location.state.leerlingnummer);
+
+      const context = this;
+
+      const data = { leerlingnummer: this.props.location.state.leerlingnummer };
+
+      fetch("/students/gegevens", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+        .then(function(response) {
+          if (response.status >= 400) {
+            throw new Error("Bad response from server");
+          }
+          return response.json();
+        })
+        .then(function(response) {
+          context.setState({
+            leerling: response[0]
+          });
+        })
+        .catch(function(err) {
+          console.log(err);
+        });
+    }
+  }
+
   render() {
-    const { leerling, moveToStepFour } = this.state;
+    const { leerling, moveToStepFour, redirectHome } = this.state;
     return (
       <Container>
+        {redirectHome ? (
+          <Redirect to={{ pathname: "/", state: { navigationError: true } }} />
+        ) : (
+          ""
+        )}
         {moveToStepFour ? (
           <Redirect
             to={{
@@ -54,7 +93,7 @@ class StepThree extends Component {
             }}
           />
         ) : (
-          <Segment.Group>
+          <Segment.Group className="top">
             <Segment>
               <h1>Beroepenmarkt</h1>
             </Segment>
