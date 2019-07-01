@@ -1,21 +1,20 @@
 # signup
 Signup system for a job fair at my High School. 
 
-## Running the App
+## Installation
 `npm install`
 
-First start the backend
+## Usage
+This projects consists of two different servers. The Express.js back end, and the React.js front end.
+
+First run the back end:
 
 `npm start`
 
-or use [nodemon](https://github.com/remy/nodemon) (recommended)
-
-`nodemon`
-
-In order to start the front-end, open a new terminal
+Run the front end by navigating to the client folder:
 
 `cd client`
 
 `npm start`
 
-Ready to go!
+You're now ready to use the app!
