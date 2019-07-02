@@ -20,7 +20,6 @@ class StepThree extends Component {
 
   moveToStepFour() {
     this.setState({ moveToStepFour: true });
-    const context = this;
 
     const data = { leerlingnummer: this.props.location.state.leerlingnummer };
 

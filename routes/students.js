@@ -4,9 +4,11 @@ var mysql = require("mysql");
 
 const pool = mysql.createPool({
   connectionLimit: 10,
-  host: "127.0.0.1",
+  host: "localhost",
   user: "root",
-  database: "students"
+  password: "root",
+  database: "signup",
+  port: 3306
 });
 
 function getConnection() {
@@ -26,7 +28,6 @@ router.post("/login", function(req, res, next) {
     fields
   ) {
     if (error) throw error;
-    console.log(typeof results[0]);
     if (typeof results[0] === "undefined") {
       res.send({ error: true });
     } else {
@@ -40,7 +41,6 @@ router.get("/beroepen", function(req, res, next) {
   const queryString = "SELECT * FROM beroepen WHERE NOT vrije_plaatsen=0";
   connection.query(queryString, function(error, results, fields) {
     if (error) throw error;
-    console.log(results);
     res.send(results);
   });
 });
@@ -56,7 +56,6 @@ router.post("/gegevens", function(req, res, next) {
     fields
   ) {
     if (error) throw error;
-    console.log(results);
     res.send(results);
   });
 });
@@ -101,7 +100,7 @@ router.post("/plaatsen", function(req, res, next) {
       fields
     ) {
       if (error) throw error;
-      console.log(results);
+
       const keuze_1 = results[0]["Beroep_1"];
       const keuze_2 = results[0]["Beroep_2"];
       const keuze_3 = results[0]["Beroep_3"];
